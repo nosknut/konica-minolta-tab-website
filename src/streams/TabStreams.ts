@@ -1,6 +1,6 @@
 import { bind } from "@react-rxjs/core";
 import { createSignal } from "@react-rxjs/utils";
-import { debounce, map, of, timer } from "rxjs";
+import { interval, map, of, throttle } from "rxjs";
 
 // Keeping these streams in a different file than the component will prevent the file from being reloaded
 // when the component file is saved after being edited
@@ -9,9 +9,18 @@ import { debounce, map, of, timer } from "rxjs";
 export const [tabInput$, setTabInput] = createSignal<string>()
 export const [useTabInput] = bind(tabInput$, "")
 
-const slowDownAtNumCharacters = 200
+
+const slowDownAtNumCharacters = 100
 // https://stackoverflow.com/questions/53044981/how-to-make-observable-debouncetime-conditional
-export const debouncedTabInput$ = tabInput$.pipe(debounce(value => value.length > slowDownAtNumCharacters ? timer(500) : of({})))
+export const debouncedTabInput$ = tabInput$.pipe(
+    throttle(
+        value => value.length > slowDownAtNumCharacters ? interval(500) : of({}),
+        {
+            leading: true,
+            trailing: true,
+        }
+    )
+)
 
 // Debounced by 500ms so the website wont lag/crash when typing fast
 export const [useDebouncedTabInput] = bind(debouncedTabInput$, "")
