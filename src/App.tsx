@@ -1,35 +1,20 @@
-import React, { useEffect, useState } from 'react';
-import logo from './logo.svg';
-import './App.css';
-import { TabShow } from './TabShow';
+import { Download } from '@mui/icons-material';
+import { AppBar, Box, Button, Grid, InputAdornment, TextField, Toolbar, Typography, useTheme } from '@mui/material';
+import useLocalStorage from '@rehooks/local-storage';
+
 import { DisplayTabs } from './DisplayTabs';
 import { fileReturn, MakeTabs } from './MakeTabs';
+import { useTabs } from './streams/TabStreams';
+import { TabInput } from './TabInput';
+import { ThemeButton } from './Themes';
+import { TutorialButton } from './Tutorial';
+
+import './App.css';
 
 function App() {
-  const [input, setinput] = useState<string>("")
-  const [tabs, settabs] = useState<string[][]>([])
-  const [Model, setModel] = useState("C754")
-
-  useEffect(() => {
-    const lines = input.split("\n")
-    const newTab: string[][] = []
-
-    const lastLine = lines[lines.length - 1]
-    if (lastLine === "")
-      lines.pop()
-
-    lines.map((line, i) => {
-      const n = i % 20
-      const t = (Math.floor(i / 20))
-
-      if (n === 0)
-        newTab[t] = []
-
-      newTab[t][n] = line
-    })
-
-    settabs(newTab)
-  }, [input])
+  const theme = useTheme()
+  const tabs = useTabs()
+  const [Model, setModel] = useLocalStorage('PrinterModel', "C754")
 
   function DownloadClick() {
     const TabFiles = MakeTabs(tabs, Model)
@@ -47,84 +32,69 @@ function App() {
   }
 
   return (
-    <div className='App'>
-      <div style={{
-        overflowY: "scroll",
-      }}
-      >
-        <textarea
-          onChange={(e) => {
-            const text = e.target.value
-            setinput(text ? text : "")
-          }}
-          style={{
-            border: "2px solid white",
-            display: "flex",
-            width: "calc(50vw - 12px)",
-            height: "calc(100vh - 12px)",
-            backgroundColor: "black",
-            color: "white",
-            fontSize: "150%",
-            padding: "4px",
-            margin: "0px"
-          }}
-          autoComplete="off"
-          autoCorrect="off"
-          autoCapitalize="off"
-          spellCheck="false"
-        />
-      </div>
-      <div style={{
-        display: "flex",
-        width: "50vw",
-        flexDirection: "column",
-      }}>
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            color: "white",
-            backgroundColor: "black",
-            border: "3px solid gold",
-            height: "fit-content"
-          }}
-        >
-          <span style={{
-            padding: "1px"
-          }}>
-            Type Model:<br />(ex: C754 or C759)
-          </span>
-          <input
-            value={Model}
-            style={{
-              width: "45px",
-              textAlign: "right",
-            }}
-            onChange={(e) => {
-              const val = e.target.value
-              setModel(val ? val : "")
-            }}
-            type="text"
-          />
-          <div style={{
-            display: "flex",
-            backgroundColor: "grey",
-            color: "black",
-            border: "3px solid white",
-            alignItems: "center",
-            alignContent: "center",
-            justifyItems: "center",
-            justifyContent: "center",
-            flex: 1
-          }}
-            onClick={DownloadClick}
+    <div style={{ width: '100%', height: '100%' }}>
+      <AppBar title="Konica Minolta Tab Generator">
+        <Toolbar style={{ justifyContent: "space-between" }}>
+          <Typography variant="h6" color="inherit">
+            Konica Minolta Tab Generator
+          </Typography>
+          <Box>
+            <TutorialButton />
+            <ThemeButton />
+          </Box>
+        </Toolbar>
+      </AppBar>
+      <main style={{ width: '100%', height: '100%', paddingTop: theme.spacing(10) }}>
+        <Grid container height="100%" justifyItems="center">
+          <Grid item xs={6} height="100%">
+            <TabInput />
+          </Grid>
+          <Grid
+            container
+            height="100%"
+            xs={6}
+            overflow="scroll"
+            spacing={1}
+            paddingX={1}
+            alignItems="flex-start"
+            justifyContent="center"
+            direction="row"
           >
-            Download
-          </div>
-        </div>
-        <DisplayTabs tabs={tabs} />
-      </div>
-    </div>
+            <Grid item xs={12}>
+              <TextField
+                value={Model}
+                fullWidth
+                label="Model"
+                id="model-input"
+                color="secondary"
+                placeholder="ex: C754 or C759"
+                onChange={(e) => {
+                  const val = e.target.value
+                  setModel(val ? val : "")
+                }}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <Button
+                        size="small"
+                        color="primary"
+                        variant="contained"
+                        id="download-configs-btn"
+                        onClick={DownloadClick}
+                        startIcon={<Download />}
+                      >
+                        Download
+                      </Button>
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Grid>
+            <DisplayTabs tabs={tabs} />
+          </Grid>
+        </Grid>
+      </main>
+    </div >
   );
 }
 
