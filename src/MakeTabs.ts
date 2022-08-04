@@ -1,4 +1,4 @@
-import TabString from "./TabExport"
+import { TabString } from "./TabExport"
 
 export type fileReturn = { name: string, write: string }
 

@@ -1,4 +1,4 @@
-﻿export default
+export const TabString =
     `[DriverInfo]\r
 model="KONICA MINOLTA {Model}SeriesPCL"\r
 version="5.3.0.EIT1_00"\r
